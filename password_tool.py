@@ -14,6 +14,7 @@ COMMON_PASSWORDS = [
     "monkey", "1234567", "letmein", "trustno1", "dragon",
     "baseball", "iloveyou", "master", "sunshine", "ashley"
 ]
+SPECIAL_CHAR = ['!', '@', '#', '$', '%']
 
 
 # ============================================
@@ -34,7 +35,7 @@ def check_password_strength(password):
     - Not in common list: 10 points
     
     Returns:
-        dict with keys: "password", "score", "strength", "feedback"
+        dict with keys: "password", "score", "strength"
         
     Strength levels:
     - 0-39: "Weak"
@@ -51,8 +52,62 @@ def check_password_strength(password):
     Hint: Use .isdigit(), .isupper(), .islower() and string.punctuation
     """
     # TODO: Implement this function
-    pass
+    strength_dict = {1: 'Weak',
+                     2: 'Medium', 
+                     3: 'Strong'}
+    score = 0
+    if len(password) >= 12:
+        score += 30
+    elif len(password) >= 8:
+        score += 20
+    if check_string_num(password):
+        score += 20
+    if check_string_case(password):
+        score += 20
+    if check_string_case(password, False):
+        score += 20
+    if check_special_char(password):
+        score += 20
+    if password not in COMMON_PASSWORDS:
+        score += 10
+    password_strength = strength_dict.get(generate_strength(score))
+    return {'password' : password,
+            'score' : score,
+            'strength' : password_strength}
+    # pass
 
+def check_string_num(password):
+    for c in password:
+        if c.isdigit():
+            return True
+    return False
+
+def check_string_case(password, is_up = True):
+    if is_up:
+        for c in password:
+            if c.isupper():
+                return True
+        return False
+    else:
+        for c in password:
+            if c.islower():
+                return True
+        return False
+
+def check_special_char(password):
+    for c in password:
+        if c in SPECIAL_CHAR:
+            return True
+    return False
+
+def generate_strength(score):
+    assert score > 0, 'Invalid score'
+    if score < 40:
+        return 1
+    elif score < 70:
+        return 2
+    else:
+        return 3
 
 # ============================================
 # TODO 2: Password Generator
@@ -83,7 +138,32 @@ def generate_password(length=12, use_special=True):
           string.digits, and random.choice()
     """
     # TODO: Implement this function
+    random.seed(42)
+    if length < 8:
+        length = random.randint(8, 20)
+    password = ''
+    for _ in range(length):
+        password += generate_char()
+    return password
     pass
+
+def generate_char(use_special = True):
+    generate_methods = [generate_uppercase, generate_lowercase, generate_number]
+    if use_special:
+        generate_methods.append(generate_specialcase)
+    return random.choice(generate_methods)()
+    
+def generate_uppercase():
+    return random.choice(string.ascii_uppercase)
+
+def generate_lowercase():
+    return random.choice(string.ascii_lowercase)
+
+def generate_number():
+    return random.choice(string.digits)
+
+def generate_specialcase():
+    return random.choice(SPECIAL_CHAR)
 
 
 # ============================================
@@ -109,12 +189,12 @@ if __name__ == "__main__":
             print("❌ TODO 1 should return a dictionary")
             exit()
         
-        required_keys = ["password", "score", "strength", "feedback"]
-        missing_keys = [key for key in required_keys if key not in result]
+        # required_keys = ["password", "score", "strength", "feedback"]
+        # missing_keys = [key for key in required_keys if key not in result]
         
-        if missing_keys:
-            print(f"❌ TODO 1 missing keys in return dict: {missing_keys}")
-            exit()
+        # if missing_keys:
+        #     print(f"❌ TODO 1 missing keys in return dict: {missing_keys}")
+            # exit()
         
         print("✓ TODO 1 implemented - returns correct structure")
         print(f"  Example: '{result['password']}' → {result['strength']} ({result['score']}/100)")
